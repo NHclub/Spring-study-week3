@@ -58,24 +58,4 @@ public class UserService {
         User user = new User(username, password, email, role);
         userRepository.save(user);
     }
-
-    public void login(LoginRequestDto requestDto, HttpServletResponse res) {
-        String username = requestDto.getUsername();
-        String password = requestDto.getPassword();
-
-        // 사용자 확인
-        User user = userRepository.findByUsername(username).orElseThrow( // findByUsername 을 실행하며 데이터베이스에서 username에 맞는 User를 찾아서 옵셔널User객체로 반환해주고 있는 것. 그래서 new를 이용해 생성하지 않아도 받을 수 있는 것임.
-                ()-> new IllegalArgumentException("등록된 사용자가 없습니다.")
-        );
-
-        // 비밀번호 확인
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
-        }
-
-        // 여기까지 왔으면 인증이 되었다는 것이니 JWT 생성 및 쿠키에 저장 후 Response 객체에 추가
-        String token = jwtUtil.createToken(user.getUsername(), user.getRole());
-        jwtUtil.addJwtToCookie(token, res);
-
-    }
 }
